@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<title>👻 SnapClone</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#fff;overflow:hidden;}
+#app{height:100%;max-width:430px;margin:0 auto;position:relative;overflow:hidden;background:#0f0f0f;}
+button{cursor:pointer;border:none;background:none;color:inherit;font-family:inherit;}
+input{font-family:inherit;outline:none;}
+.screen{position:absolute;inset:0;overflow:hidden;display:flex;flex-direction:column;}
+.scrollable{overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.hidden{display:none!important;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.fade-in{animation:fadeIn .2s ease;}
+.slide-up{animation:slideUp .22s ease;}
+#toast{position:fixed;top:52px;left:50%;transform:translateX(-50%);background:#FFFC00;color:#000;padding:10px 22px;border-radius:100px;font-size:14px;font-weight:700;z-index:9999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);display:none;pointer-events:none;}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#1a1a1a;border-top:1px solid #2e2e2e;display:flex;padding:8px 0 20px;z-index:100;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;opacity:.4;transition:opacity .2s;border:none;background:none;cursor:pointer;}
+.nav-btn.active{opacity:1;}
+.nav-btn .nav-label{font-size:10px;font-weight:700;color:#8a8a8a;}
+.nav-btn.active .nav-label{color:#FFFC00;}
+.nav-center{width:52px;height:52px;background:#FFFC00;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin-top:-20px;box-shadow:0 4px 20px rgba(255,252,0,.4);}
+.card{background:#1a1a1a;border-radius:16px;border:1px solid #2e2e2e;overflow:hidden;}
+.field{width:100%;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:12px;padding:14px 16px;color:#fff;font-size:15px;display:block;margin-bottom:14px;}
+.field::placeholder{color:#555;}
+.lbl{font-size:11px;font-weight:700;color:#8a8a8a;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;}
+.btn-y{background:#FFFC00;color:#000;font-weight:800;border-radius:14px;padding:15px;font-size:16px;width:100%;border:none;cursor:pointer;}
+.pill{border-radius:20px;font-size:12px;font-weight:700;padding:7px 14px;cursor:pointer;border:none;}
+.row{display:flex;align-items:center;gap:12px;}
+.press{transition:transform .1s,opacity .1s;}
+.press:active{transform:scale(.94);opacity:.8;}
+.dot-on{width:11px;height:11px;background:#00D4AA;border-radius:50%;border:2px solid #0f0f0f;position:absolute;bottom:1px;right:1px;}
+.bubble-me{background:#FFFC00;color:#000;padding:10px 14px;border-radius:18px 18px 4px 18px;font-size:14px;line-height:1.4;display:inline-block;max-width:100%;}
+.bubble-them{background:#242424;color:#fff;padding:10px 14px;border-radius:18px 18px 18px 4px;font-size:14px;line-height:1.4;display:inline-block;max-width:100%;}
+.msg-time{font-size:10px;color:#555;margin-top:3px;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;flex-direction:column;justify-content:flex-end;}
+.modal-sheet{background:#1a1a1a;border-radius:24px 24px 0 0;padding:24px;max-height:75vh;overflow-y:auto;}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="toast"></div>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen" style="background:linear-gradient(160deg,#0f0f0f,#1a1008);align-items:center;justify-content:center;padding:32px;">
+  <div style="text-align:center;margin-bottom:40px;">
+    <div style="font-size:72px;margin-bottom:8px;">👻</div>
+    <h1 style="font-size:36px;font-weight:900;color:#FFFC00;letter-spacing:-1px;">snapclone</h1>
+    <p style="color:#8a8a8a;font-size:14px;margin-top:4px;">Life's more fun in the moment.</p>
+  </div>
+  <div style="width:100%;max-width:340px;">
+    <label class="lbl">Email or Username</label>
+    <input id="li-email" class="field" type="email" placeholder="your@email.com"/>
+    <label class="lbl">Password</label>
+    <input id="li-pw" class="field" type="password" placeholder="••••••••"/>
+    <button class="btn-y press" onclick="doLogin()">Log In</button>
+    <p style="text-align:center;color:#8a8a8a;font-size:13px;margin-top:16px;">Forgot password? <span style="color:#FFFC00;font-weight:600;">Reset it</span></p>
+    <div style="border-top:1px solid #2e2e2e;margin:24px 0;"></div>
+    <button class="press" onclick="go('signup')" style="width:100%;padding:14px;border:2px solid #FFFC00;color:#FFFC00;font-weight:700;font-size:15px;border-radius:14px;background:transparent;">Create Account</button>
+  </div>
+</div>
+
+<!-- SIGNUP -->
+<div id="screen-signup" class="screen hidden" style="background:linear-gradient(160deg,#0f0f0f,#1a1008);align-items:center;justify-content:center;padding:32px;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <div style="font-size:60px;margin-bottom:8px;">👻</div>
+    <h1 style="font-size:28px;font-weight:900;color:#FFFC00;">Join snapclone</h1>
+  </div>
+  <div style="width:100%;max-width:340px;">
+    <label class="lbl">Email</label>
+    <input id="su-email" class="field" type="email" placeholder="your@email.com"/>
+    <label class="lbl">Username</label>
+    <input id="su-user" class="field" placeholder="cool_username"/>
+    <label class="lbl">Password</label>
+    <input id="su-pw" class="field" type="password" placeholder="At least 8 characters"/>
+    <button class="btn-y press" onclick="doSignup()">Sign Up</button>
+    <p style="text-align:center;color:#8a8a8a;font-size:13px;margin-top:20px;">Already have an account? <span style="color:#FFFC00;font-weight:600;cursor:pointer;" onclick="go('login')">Log In</span></p>
+  </div>
+</div>
+
+<!-- CAMERA -->
+<div id="screen-camera" class="screen hidden">
+  <div style="flex:1;position:relative;background:linear-gradient(135deg,#1a1a2e,#0f3460);overflow:hidden;">
+    <video id="cam-vid" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:none;"></video>
+    <canvas id="cam-cvs" style="display:none;"></canvas>
+    <div id="cam-ph" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+      <div style="font-size:72px;">👻</div>
+      <p style="color:rgba(255,255,255,.5);font-size:14px;">Camera unavailable</p>
+      <p style="color:rgba(255,255,255,.3);font-size:12px;">Tap shutter to make a snap anyway</p>
+    </div>
+    <div style="position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:52px 20px 16px;">
+      <button class="press" onclick="showNotif('Flash ⚡')" style="width:40px;height:40px;background:rgba(0,0,0,.45);border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;">⚡</button>
+      <button class="press" onclick="flipCam()" style="width:40px;height:40px;background:rgba(0,0,0,.45);border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;">🔄</button>
+    </div>
+    <div id="streak-peeks" style="position:absolute;top:110px;right:16px;display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+  <div style="padding:24px 40px 100px;display:flex;justify-content:center;align-items:center;gap:40px;background:rgba(0,0,0,.92);">
+    <button class="press" style="width:44px;height:44px;background:#242424;border-radius:50%;font-size:22px;display:flex;align-items:center;justify-content:center;">🖼️</button>
+    <button class="press" onclick="captureSnap()" style="width:80px;height:80px;border-radius:50%;border:4px solid #FFFC00;background:rgba(255,252,0,.12);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(255,252,0,.3);">
+      <div style="width:60px;height:60px;background:#FFFC00;border-radius:50%;"></div>
+    </button>
+    <button class="press" onclick="showNotif('Bitmoji sent! 🎭')" style="width:44px;height:44px;background:#242424;border-radius:50%;font-size:22px;display:flex;align-items:center;justify-content:center;">🎭</button>
+  </div>
+</div>
+
+<!-- SNAP PREVIEW -->
+<div id="snap-preview" class="hidden" style="position:fixed;inset:0;background:#000;z-index:150;max-width:430px;margin:0 auto;display:flex;flex-direction:column;">
+  <div style="flex:1;position:relative;">
+    <img id="snap-img" src="" style="width:100%;height:100%;object-fit:cover;"/>
+    <div style="position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:50px 20px 16px;background:linear-gradient(to bottom,rgba(0,0,0,.6),transparent);">
+      <button class="press" onclick="closePreview()" style="width:40px;height:40px;background:rgba(0,0,0,.45);border-radius:50%;font-size:18px;color:#fff;display:flex;align-items:center;justify-content:center;">✕</button>
+      <div style="display:flex;gap:10px;">
+        <button class="press" style="width:40px;height:40px;background:rgba(0,0,0,.45);border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;">✏️</button>
+        <button class="press" style="width:40px;height:40px;background:rgba(0,0,0,.45);border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;">🎨</button>
+        <button class="press" style="width:40px;height:40px;background:rgba(0,0,0,.45);border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;">😂</button>
+      </div>
+    </div>
+  </div>
+  <div style="padding:16px 20px 40px;background:rgba(0,0,0,.7);display:flex;gap:12px;">
+    <button class="press" onclick="showNotif('Saved 💾');closePreview();" style="flex:1;padding:14px;background:rgba(0,0,0,.5);color:#fff;font-weight:700;border-radius:14px;font-size:14px;border:1px solid rgba(255,255,255,.2);">Save</button>
+    <button class="press" onclick="openSendModal()" style="flex:2;padding:14px;background:#FFFC00;color:#000;font-weight:800;border-radius:14px;font-size:14px;">Send To →</button>
+  </div>
+</div>
+
+<!-- SEND MODAL -->
+<div id="send-modal" class="modal-bg hidden">
+  <div class="modal-sheet">
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:16px;">Send to...</h3>
+    <div id="send-list"></div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button onclick="closeSendModal()" style="flex:1;padding:14px;border-radius:12px;border:1px solid #2e2e2e;color:#8a8a8a;font-weight:600;background:none;">Cancel</button>
+      <button id="send-btn" onclick="confirmSend()" style="flex:2;padding:14px;border-radius:12px;background:#555;color:#888;font-weight:800;font-size:15px;">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT LIST -->
+<div id="screen-chat" class="screen hidden">
+  <div style="padding:52px 20px 16px;display:flex;justify-content:space-between;align-items:center;background:#0f0f0f;flex-shrink:0;">
+    <h1 style="font-size:24px;font-weight:900;">Chat</h1>
+    <button style="width:36px;height:36px;background:#242424;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;">✉️</button>
+  </div>
+  <div class="scrollable" style="flex:1;padding-bottom:80px;">
+    <div id="freq-banner" style="margin:0 16px 12px;background:rgba(255,252,0,.1);border:1px solid rgba(255,252,0,.3);border-radius:16px;padding:14px;">
+      <p style="font-size:12px;font-weight:700;color:#FFFC00;margin-bottom:10px;">FRIEND REQUESTS · 1</p>
+      <div class="row">
+        <div id="freq-avatar" style="width:40px;height:40px;flex-shrink:0;"></div>
+        <div style="flex:1;"><div style="font-weight:700;font-size:14px;">@comet_rush</div><div style="font-size:11px;color:#8a8a8a;">Added you</div></div>
+        <button class="press pill" style="background:#FFFC00;color:#000;" onclick="showNotif('Friend accepted! 🤝');document.getElementById(\'freq-banner\').style.display=\'none\'">Accept</button>
+        <button class="press pill" style="background:#242424;color:#8a8a8a;" onclick="document.getElementById(\'freq-banner\').style.display=\'none\'">✕</button>
+      </div>
+    </div>
+    <div id="chat-list"></div>
+  </div>
+</div>
+
+<!-- CHAT ROOM -->
+<div id="screen-chatroom" class="screen hidden">
+  <div id="room-header" style="background:#1a1a1a;padding:50px 16px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2e2e2e;flex-shrink:0;"></div>
+  <div id="room-msgs" class="scrollable" style="flex:1;padding:12px 16px;"></div>
+  <div style="padding:10px 12px 28px;background:#1a1a1a;border-top:1px solid #2e2e2e;display:flex;gap:8px;align-items:center;flex-shrink:0;">
+    <button class="press" style="width:36px;height:36px;background:#242424;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;">📸</button>
+    <div style="flex:1;background:#242424;border-radius:22px;padding:0 14px;display:flex;align-items:center;border:1px solid #2e2e2e;">
+      <input id="msg-input" placeholder="Send a message" style="flex:1;background:none;color:#fff;font-size:14px;padding:10px 0;border:none;" onkeydown="if(event.key==='Enter')sendMsg()"/>
+      <button class="press" onclick="document.getElementById('msg-input').value+='😂'" style="font-size:18px;padding:0 4px;">😂</button>
+    </div>
+    <button class="press" onclick="sendMsg()" style="width:36px;height:36px;background:#FFFC00;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;color:#000;font-weight:800;">→</button>
+  </div>
+</div>
+
+<!-- FRIENDS -->
+<div id="screen-friends" class="screen hidden">
+  <div style="padding:52px 20px 16px;display:flex;justify-content:space-between;align-items:center;background:#0f0f0f;flex-shrink:0;">
+    <h1 style="font-size:24px;font-weight:900;">Friends</h1>
+    <button class="press pill" style="background:#FFFC00;color:#000;" onclick="openAddModal()">+ Add</button>
+  </div>
+  <div class="scrollable" style="flex:1;padding-bottom:80px;">
+    <div style="margin:0 16px 16px;background:#242424;border-radius:12px;display:flex;align-items:center;padding:0 14px;border:1px solid #2e2e2e;">
+      <span style="color:#555;margin-right:8px;">🔍</span>
+      <input id="fr-search" placeholder="Search friends" oninput="renderFriends()" style="flex:1;background:none;color:#fff;font-size:14px;padding:12px 0;border:none;"/>
+    </div>
+    <div style="margin:0 16px 20px;background:#242424;border-radius:16px;padding:16px;">
+      <p style="font-size:12px;font-weight:700;color:#FF6B35;margin-bottom:12px;">🔥 TOP STREAKS</p>
+      <div id="streak-board"></div>
+    </div>
+    <p style="font-size:12px;font-weight:700;color:#8a8a8a;padding:0 20px 10px;">ALL FRIENDS · 4</p>
+    <div id="friends-list"></div>
+  </div>
+</div>
+
+<!-- ADD FRIEND MODAL -->
+<div id="add-modal" class="modal-bg hidden" onclick="closeAddModal()">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:16px;">Add Friends</h3>
+    <div style="background:#242424;border-radius:12px;display:flex;align-items:center;padding:0 14px;margin-bottom:16px;border:1px solid #2e2e2e;">
+      <span style="color:#555;margin-right:8px;">🔍</span>
+      <input id="add-q" placeholder="Search by username" oninput="renderAddResults()" style="flex:1;background:none;color:#fff;font-size:14px;padding:12px 0;border:none;"/>
+    </div>
+    <div class="press row" onclick="showNotif('QR scanner opening 📷')" style="padding:14px;background:#242424;border-radius:14px;margin-bottom:16px;cursor:pointer;">
+      <span style="font-size:28px;">⬛</span>
+      <div><div style="font-weight:700;font-size:14px;">Scan Snapcode</div><div style="font-size:12px;color:#8a8a8a;">Point camera at a Snapcode</div></div>
+    </div>
+    <div id="add-results"></div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="screen-profile" class="screen hidden">
+  <div class="scrollable" style="flex:1;padding-bottom:80px;">
+    <div id="profile-hero" style="background:linear-gradient(135deg,rgba(255,252,0,.12),rgba(139,92,246,.12));padding:52px 20px 24px;text-align:center;"></div>
+    <div id="avatar-editor" style="display:none;margin:16px;background:#1a1a1a;border-radius:20px;overflow:hidden;border:1px solid #2e2e2e;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;">
+        <h3 style="font-size:16px;font-weight:800;">🎭 Edit Avatar</h3>
+        <button class="press pill" style="background:#FFFC00;color:#000;" onclick="saveAvatar()">Save</button>
+      </div>
+      <div id="av-preview" style="display:flex;justify-content:center;padding:8px 0 16px;background:rgba(255,252,0,.04);"></div>
+      <div id="av-tabs" style="display:flex;overflow-x:auto;gap:8px;padding:0 12px 12px;-webkit-overflow-scrolling:touch;"></div>
+      <div id="av-opts" style="padding:8px 12px 16px;display:flex;flex-wrap:wrap;gap:8px;min-height:52px;"></div>
+    </div>
+    <div style="margin:16px;" class="card">
+      <div class="press row" onclick="showNotif('Notifications')" style="padding:15px 16px;border-bottom:1px solid #2e2e2e;cursor:pointer;"><span style="font-size:20px;">🔔</span><span style="flex:1;font-size:15px;font-weight:500;margin-left:14px;">Notifications</span><span style="color:#555;font-size:18px;">›</span></div>
+      <div class="press row" onclick="showNotif('Privacy & Safety')" style="padding:15px 16px;border-bottom:1px solid #2e2e2e;cursor:pointer;"><span style="font-size:20px;">🔒</span><span style="flex:1;font-size:15px;font-weight:500;margin-left:14px;">Privacy & Safety</span><span style="color:#555;font-size:18px;">›</span></div>
+      <div class="press row" onclick="showNotif('Appearance')" style="padding:15px 16px;border-bottom:1px solid #2e2e2e;cursor:pointer;"><span style="font-size:20px;">🎨</span><span style="flex:1;font-size:15px;font-weight:500;margin-left:14px;">Appearance</span><span style="color:#555;font-size:18px;">›</span></div>
+      <div class="press row" onclick="showNotif('Support')" style="padding:15px 16px;cursor:pointer;"><span style="font-size:20px;">❤️</span><span style="flex:1;font-size:15px;font-weight:500;margin-left:14px;">Support</span><span style="color:#555;font-size:18px;">›</span></div>
+    </div>
+    <div style="padding:0 16px 16px;">
+      <button class="press" onclick="showNotif('Logged out 👋')" style="width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,59,92,.4);color:#FF3B5C;font-weight:700;font-size:15px;background:none;">Log Out</button>
+    </div>
+    <div style="margin:0 16px 16px;padding:14px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);border-radius:14px;">
+      <p style="font-size:12px;font-weight:700;color:#8B5CF6;margin-bottom:4px;">🚀 COMING SOON</p>
+      <p style="font-size:12px;color:#8a8a8a;">AR Lenses · Stories · Spotlight · Snap Map</p>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="nav" class="hidden">
+  <button class="nav-btn press" id="nb-chat" onclick="switchTab('chat')"><span style="font-size:22px;">💬</span><span class="nav-label">Chat</span></button>
+  <button class="nav-btn press" id="nb-camera" onclick="switchTab('camera')"><div class="nav-center">👻</div><span class="nav-label">Snap</span></button>
+  <button class="nav-btn press" id="nb-friends" onclick="switchTab('friends')"><span style="font-size:22px;">👥</span><span class="nav-label">Friends</span></button>
+  <button class="nav-btn press" id="nb-profile" onclick="switchTab('profile')"><span style="font-size:22px;">🎭</span><span class="nav-label">Me</span></button>
+</nav>
+
+</div><!-- #app -->
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+var USERS = {
+  me:{id:'me',username:'you',displayName:'You',avatar:{skinTone:'#E8956D',hair:'wavy',hairColor:'#8B4513',eyes:'almond',eyeColor:'#2E7D32',outfit:'hoodie',outfitColor:'#8B5CF6',accessory:'none'},online:true},
+  u1:{id:'u1',username:'solar_flux',displayName:'Mia Chen',avatar:{skinTone:'#C68642',hair:'straight',hairColor:'#1A0A00',eyes:'almond',eyeColor:'#4A3728',outfit:'tshirt',outfitColor:'#FF3B5C',accessory:'sunglasses'},online:true,lastActive:null},
+  u2:{id:'u2',username:'neon_drift',displayName:'Jake Rivera',avatar:{skinTone:'#FDBCB4',hair:'short',hairColor:'#DAA520',eyes:'wide',eyeColor:'#1565C0',outfit:'jacket',outfitColor:'#1565C0',accessory:'headphones'},online:false,lastActive:'2m ago'},
+  u3:{id:'u3',username:'pixel_sage',displayName:'Priya Nair',avatar:{skinTone:'#8D5524',hair:'curly',hairColor:'#1A0A00',eyes:'round',eyeColor:'#4A3728',outfit:'dress',outfitColor:'#8B5CF6',accessory:'none'},online:true,lastActive:null},
+  u4:{id:'u4',username:'ghost_wave',displayName:'Sam Torres',avatar:{skinTone:'#FDBCB4',hair:'bun',hairColor:'#808080',eyes:'sleepy',eyeColor:'#78909C',outfit:'uniform',outfitColor:'#2E7D32',accessory:'glasses'},online:false,lastActive:'1h ago'}
+};
+var FRIENDS=['u1','u2','u3','u4'];
+var STREAKS={u1:14,u2:7,u3:3,u4:1};
+var MESSAGES={
+  u1:[{id:'m1',from:'u1',text:'did you see that?? 👀',ts:Date.now()-120000},{id:'m2',from:'me',text:'omg yes send me that snap',ts:Date.now()-60000},{id:'m3',from:'u1',text:'sent!! it disappears tho lol',ts:Date.now()-30000}],
+  u2:[{id:'m4',from:'u2',text:'streak or reset tomorrow?',ts:Date.now()-300000},{id:'m5',from:'me',text:'i got you fr 🔥',ts:Date.now()-240000}],
+  u3:[{id:'m6',from:'u3',text:'happy monday!',ts:Date.now()-3600000}],
+  u4:[]
+};
+var LAYERS={
+  skinTone:{label:'Skin',type:'color',options:['#FDBCB4','#E8956D','#C68642','#8D5524','#4A2912']},
+  hair:{label:'Hair',type:'style',options:['straight','wavy','curly','short','bun','none']},
+  hairColor:{label:'Hair Color',type:'color',options:['#1A0A00','#3D1A00','#8B4513','#DAA520','#FF6B35','#FF69B4','#4B0082','#808080']},
+  eyes:{label:'Eyes',type:'style',options:['round','almond','wide','sleepy']},
+  eyeColor:{label:'Eye Color',type:'color',options:['#4A3728','#2E7D32','#1565C0','#6A1B9A','#78909C','#000000']},
+  outfit:{label:'Outfit',type:'style',options:['hoodie','tshirt','jacket','dress','uniform']},
+  outfitColor:{label:'Outfit Color',type:'color',options:['#FF6B35','#1565C0','#2E7D32','#6A1B9A','#FF3B5C','#000000','#FFFFFF','#808080']},
+  accessory:{label:'Accessory',type:'style',options:['none','glasses','sunglasses','hat','headphones','crown']}
+};
+
+var activeChat=null, sendSel=[], myAvatar=copyObj(USERS.me.avatar), editLayer=null, editorOpen=false;
+var camStream=null, facingMode='user';
+var REPLIES=['lol 😂','no way!!','🔥🔥','send snap?','ok bet','yasss','omg same','💀','facts','literally'];
+
+function copyObj(o){return JSON.parse(JSON.stringify(o));}
+
+// ── AVATAR SVG ────────────────────────────────────────────────────────────────
+function mkAvatar(cfg,size){
+  var sk=cfg.skinTone||'#FDBCB4',hc=cfg.hairColor||'#1A0A00',ec=cfg.eyeColor||'#4A3728',oc=cfg.outfitColor||'#FF6B35';
+  var h=cfg.hair||'straight',ey=cfg.eyes||'round',ou=cfg.outfit||'hoodie',ac=cfg.accessory||'none';
+  var hairs={
+    straight:'<rect x="18" y="10" width="44" height="22" rx="4" fill="'+hc+'"/>',
+    wavy:'<path d="M18 18 Q28 8 40 14 Q52 20 62 14 L62 22 Q52 28 40 22 Q28 16 18 22Z" fill="'+hc+'"/>',
+    curly:'<ellipse cx="40" cy="16" rx="22" ry="12" fill="'+hc+'"/>',
+    short:'<rect x="20" y="12" width="40" height="14" rx="6" fill="'+hc+'"/>',
+    bun:'<rect x="22" y="14" width="36" height="16" rx="4" fill="'+hc+'"/><circle cx="40" cy="8" r="8" fill="'+hc+'"/>',
+    none:''
+  };
+  var eyess={
+    round:'<circle cx="32" cy="36" r="4" fill="'+ec+'"/><circle cx="48" cy="36" r="4" fill="'+ec+'"/>',
+    almond:'<path d="M28 36 Q32 32 36 36 Q32 40 28 36Z" fill="'+ec+'"/><path d="M44 36 Q48 32 52 36 Q48 40 44 36Z" fill="'+ec+'"/>',
+    wide:'<circle cx="32" cy="36" r="5" fill="'+ec+'"/><circle cx="48" cy="36" r="5" fill="'+ec+'"/>',
+    sleepy:'<path d="M28 36 Q32 33 36 36" stroke="'+ec+'" stroke-width="2.5" fill="none"/><path d="M44 36 Q48 33 52 36" stroke="'+ec+'" stroke-width="2.5" fill="none"/>'
+  };
+  var outfits={
+    hoodie:'<rect x="18" y="60" width="44" height="28" rx="6" fill="'+oc+'"/><path d="M28 60 L40 70 L52 60" stroke="'+oc+'" stroke-width="8" fill="none"/>',
+    tshirt:'<rect x="20" y="60" width="40" height="28" rx="4" fill="'+oc+'"/><path d="M20 60 L14 68 L20 72" fill="'+oc+'"/><path d="M60 60 L66 68 L60 72" fill="'+oc+'"/>',
+    jacket:'<rect x="18" y="58" width="44" height="30" rx="4" fill="'+oc+'"/><rect x="36" y="58" width="8" height="30" fill="'+sk+'" opacity="0.3"/>',
+    dress:'<path d="M26 58 L18 88 L62 88 L54 58Z" fill="'+oc+'"/>',
+    uniform:'<rect x="20" y="60" width="40" height="28" rx="4" fill="'+oc+'"/><rect x="20" y="60" width="8" height="28" fill="'+oc+'" opacity="0.6"/>'
+  };
+  var accs={
+    none:'',
+    glasses:'<rect x="26" y="34" width="14" height="10" rx="3" fill="none" stroke="#444" stroke-width="2"/><rect x="42" y="34" width="14" height="10" rx="3" fill="none" stroke="#444" stroke-width="2"/><line x1="40" y1="38" x2="42" y2="38" stroke="#444" stroke-width="2"/>',
+    sunglasses:'<rect x="25" y="33" width="16" height="11" rx="4" fill="#111" opacity="0.9"/><rect x="43" y="33" width="16" height="11" rx="4" fill="#111" opacity="0.9"/>',
+    hat:'<ellipse cx="40" cy="20" rx="24" ry="5" fill="'+hc+'"/><rect x="24" y="5" width="32" height="18" rx="3" fill="'+hc+'"/>',
+    headphones:'<path d="M18 32 Q18 20 40 20 Q62 20 62 32" stroke="#555" stroke-width="3" fill="none"/><rect x="14" y="30" width="8" height="10" rx="2" fill="#555"/><rect x="58" y="30" width="8" height="10" rx="2" fill="#555"/>',
+    crown:'<path d="M22 18 L28 8 L40 14 L52 8 L58 18 L22 18Z" fill="#FFD700"/>'
+  };
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 80 88" style="border-radius:50%;background:'+sk+'22;flex-shrink:0;display:block;">'
+    +(outfits[ou]||'')
+    +'<rect x="34" y="52" width="12" height="12" fill="'+sk+'"/>'
+    +'<ellipse cx="40" cy="36" rx="22" ry="24" fill="'+sk+'"/>'
+    +(hairs[h]||'')
+    +(eyess[ey]||'')
+    +'<circle cx="40" cy="42" r="1.5" fill="'+(sk==='#FDBCB4'?'#E8A090':'#00000033')+'"/>'
+    +'<path d="M34 48 Q40 53 46 48" stroke="#C06060" stroke-width="2" fill="none" stroke-linecap="round"/>'
+    +(accs[ac]||'')
+    +'</svg>';
+}
+
+function fmtTime(ts){
+  var d=Date.now()-ts;
+  if(d<60000)return 'now';
+  if(d<3600000)return Math.floor(d/60000)+'m';
+  if(d<86400000)return Math.floor(d/3600000)+'h';
+  return Math.floor(d/86400000)+'d';
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+var toastT;
+function showNotif(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  clearTimeout(toastT);
+  toastT=setTimeout(function(){t.style.display='none';},2500);
+}
+
+// ── SCREEN ROUTING ────────────────────────────────────────────────────────────
+var ALL_SCREENS=['login','signup','camera','chat','chatroom','friends','profile'];
+function go(name){
+  ALL_SCREENS.forEach(function(s){
+    var el=document.getElementById('screen-'+s);
+    if(el) el.classList.toggle('hidden',s!==name);
+  });
+  var isAuth=name==='login'||name==='signup';
+  var isRoom=name==='chatroom';
+  document.getElementById('nav').classList.toggle('hidden',isAuth||isRoom);
+}
+
+function switchTab(tab){
+  activeChat=null;
+  ['chat','camera','friends','profile'].forEach(function(t){
+    var b=document.getElementById('nb-'+t);
+    if(b) b.classList.toggle('active',t===tab);
+  });
+  go(tab);
+  if(tab==='camera'){startCam();}
+  else{stopCam();}
+  if(tab==='chat') renderChatList();
+  if(tab==='friends'){renderStreakBoard();renderFriends();}
+  if(tab==='profile') renderProfile();
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function doLogin(){
+  if(!document.getElementById('li-email').value||!document.getElementById('li-pw').value){showNotif('Fill in all fields');return;}
+  go('camera'); switchTab('camera'); showNotif('Welcome back! 👻');
+}
+function doSignup(){
+  if(!document.getElementById('su-email').value||!document.getElementById('su-user').value||!document.getElementById('su-pw').value){showNotif('Fill in all fields');return;}
+  go('camera'); switchTab('camera'); showNotif('Account created! 🎉');
+}
+
+// ── CAMERA ────────────────────────────────────────────────────────────────────
+function startCam(){
+  stopCam();
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){renderStreakPeeks();return;}
+  navigator.mediaDevices.getUserMedia({video:{facingMode:facingMode},audio:false}).then(function(s){
+    camStream=s;
+    var v=document.getElementById('cam-vid');
+    v.srcObject=s; v.style.display='block';
+    document.getElementById('cam-ph').style.display='none';
+  }).catch(function(){
+    document.getElementById('cam-vid').style.display='none';
+    document.getElementById('cam-ph').style.display='flex';
+  }).finally(function(){renderStreakPeeks();});
+}
+function stopCam(){
+  if(camStream){camStream.getTracks().forEach(function(t){t.stop();});camStream=null;}
+}
+function flipCam(){
+  facingMode=facingMode==='user'?'environment':'user';
+  startCam();
+}
+function renderStreakPeeks(){
+  var el=document.getElementById('streak-peeks');
+  if(!el)return;
+  el.innerHTML=FRIENDS.slice(0,3).map(function(fid){
+    var s=STREAKS[fid];
+    return '<div style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.5);border-radius:20px;padding:4px 10px 4px 4px;">'
+      +mkAvatar(USERS[fid].avatar,28)
+      +(s>0?'<span style="color:#FFFC00;font-size:12px;font-weight:700;">🔥'+s+'</span>':'')
+      +'</div>';
+  }).join('');
+}
+function captureSnap(){
+  var v=document.getElementById('cam-vid'),c=document.getElementById('cam-cvs'),dataUrl;
+  if(v.style.display!=='none'&&v.videoWidth>0){
+    c.width=v.videoWidth;c.height=v.videoHeight;
+    c.getContext('2d').drawImage(v,0,0);
+    dataUrl=c.toDataURL('image/jpeg',.85);
+  } else {
+    var pairs=[['#FF6B35','#FF3B5C'],['#8B5CF6','#FF6B35'],['#00D4AA','#8B5CF6'],['#FFFC00','#FF6B35']];
+    var p=pairs[Math.floor(Math.random()*pairs.length)];
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="360" height="640">'
+      +'<defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">'
+      +'<stop offset="0%" stop-color="'+p[0]+'"/><stop offset="100%" stop-color="'+p[1]+'"/>'
+      +'</linearGradient></defs>'
+      +'<rect width="360" height="640" fill="url(#g)"/>'
+      +'<text x="180" y="290" font-size="90" text-anchor="middle">📸</text>'
+      +'<text x="180" y="360" font-size="22" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">Snap!</text>'
+      +'</svg>';
+    dataUrl='data:image/svg+xml;base64,'+btoa(svg);
+  }
+  document.getElementById('snap-img').src=dataUrl;
+  document.getElementById('snap-preview').classList.remove('hidden');
+}
+function closePreview(){document.getElementById('snap-preview').classList.add('hidden');sendSel=[];}
+function openSendModal(){
+  sendSel=[];
+  document.getElementById('send-list').innerHTML=FRIENDS.map(function(fid){
+    var f=USERS[fid];
+    return '<div id="sr-'+fid+'" onclick="toggleSend(\''+fid+'\')" class="press" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #2e2e2e;cursor:pointer;">'
+      +mkAvatar(f.avatar,44)
+      +'<div style="flex:1;"><div style="font-weight:700;font-size:15px;">'+f.displayName+'</div>'
+      +'<div style="font-size:12px;color:#8a8a8a;">@'+f.username+(STREAKS[fid]?' 🔥'+STREAKS[fid]:'')+'</div></div>'
+      +'<div id="chk-'+fid+'" style="width:24px;height:24px;border-radius:50%;border:2px solid #2e2e2e;display:flex;align-items:center;justify-content:center;font-size:13px;"></div>'
+      +'</div>';
+  }).join('');
+  document.getElementById('send-modal').classList.remove('hidden');
+}
+function toggleSend(fid){
+  var idx=sendSel.indexOf(fid),chk=document.getElementById('chk-'+fid);
+  if(idx>-1){sendSel.splice(idx,1);chk.style.background='transparent';chk.style.borderColor='#2e2e2e';chk.textContent='';}
+  else{sendSel.push(fid);chk.style.background='#FFFC00';chk.style.borderColor='#FFFC00';chk.textContent='✓';}
+  var btn=document.getElementById('send-btn');
+  btn.style.background=sendSel.length?'#FFFC00':'#555';
+  btn.style.color=sendSel.length?'#000':'#888';
+  btn.textContent=sendSel.length?'Send ('+sendSel.length+')':'Send';
+}
+function closeSendModal(){document.getElementById('send-modal').classList.add('hidden');}
+function confirmSend(){
+  if(!sendSel.length)return;
+  showNotif('Snap sent to '+sendSel.length+' friend'+(sendSel.length>1?'s':'')+'! 👻');
+  closeSendModal();closePreview();
+}
+
+// ── CHAT LIST ─────────────────────────────────────────────────────────────────
+function renderChatList(){
+  document.getElementById('freq-avatar').innerHTML=mkAvatar({skinTone:'#4A2912',hair:'short',hairColor:'#000000',eyes:'round',eyeColor:'#4A3728',outfit:'tshirt',outfitColor:'#FF6B35',accessory:'none'},40);
+  document.getElementById('chat-list').innerHTML=FRIENDS.map(function(fid){
+    var f=USERS[fid],msgs=MESSAGES[fid]||[],last=msgs[msgs.length-1];
+    var unread=fid==='u1'?1:0,streak=STREAKS[fid];
+    return '<div onclick="openRoom(\''+fid+'\')" class="press" style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid rgba(46,46,46,.4);cursor:pointer;">'
+      +'<div style="position:relative;flex-shrink:0;">'+mkAvatar(f.avatar,52)+(f.online?'<div class="dot-on"></div>':'')+'</div>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">'
+      +'<span style="font-weight:700;font-size:15px;">'+f.displayName+'</span>'
+      +'<span style="font-size:11px;color:#555;">'+(last?fmtTime(last.ts):'')+'</span></div>'
+      +'<div style="display:flex;align-items:center;gap:6px;">'
+      +'<span style="font-size:12px;color:'+(unread?'#fff':'#8a8a8a')+';font-weight:'+(unread?600:400)+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">'+(last?(last.from==='me'?'You: '+last.text:last.text):'Say hi! 👋')+'</span>'
+      +(streak>0?'<span style="font-size:11px;color:#FF6B35;font-weight:700;flex-shrink:0;">🔥'+streak+'</span>':'')
+      +(unread>0?'<div style="width:18px;height:18px;background:#FFFC00;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#000;flex-shrink:0;">'+unread+'</div>':'')
+      +'</div></div></div>';
+  }).join('');
+}
+
+// ── CHAT ROOM ─────────────────────────────────────────────────────────────────
+function openRoom(fid){
+  activeChat=fid;
+  var f=USERS[fid],streak=STREAKS[fid];
+  document.getElementById('room-header').innerHTML=
+    '<button onclick="closeRoom()" class="press" style="color:#8a8a8a;font-size:26px;line-height:1;padding:0 4px;flex-shrink:0;">‹</button>'
+    +mkAvatar(f.avatar,40)
+    +'<div style="flex:1;margin-left:4px;">'
+    +'<div style="font-weight:800;font-size:16px;">'+f.displayName+'</div>'
+    +'<div style="font-size:12px;color:'+(f.online?'#00D4AA':'#8a8a8a')+';">'+(f.online?'Active now':'Last active '+f.lastActive)+'</div></div>'
+    +(streak>0?'<div style="display:flex;flex-direction:column;align-items:center;"><span style="font-size:20px;">🔥</span><span style="font-size:11px;font-weight:800;color:#FF6B35;">'+streak+'</span></div>':'')
+    +'<button onclick="showNotif(\'Opening camera 📸\')" class="press" style="width:36px;height:36px;background:#FFFC00;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;">📸</button>';
+  renderRoomMsgs();
+  go('chatroom');
+}
+function closeRoom(){go('chat');renderChatList();}
+function renderRoomMsgs(){
+  if(!activeChat)return;
+  var msgs=MESSAGES[activeChat]||[],f=USERS[activeChat],el=document.getElementById('room-msgs');
+  if(msgs.length===0){
+    el.innerHTML='<div style="text-align:center;padding:40px 0;color:#8a8a8a;display:flex;flex-direction:column;align-items:center;gap:12px;">'+mkAvatar(f.avatar,60)+'<p style="font-size:15px;font-weight:600;">'+f.displayName+'</p><p style="font-size:13px;color:#555;">Say something!</p></div>';
+    return;
+  }
+  el.innerHTML=msgs.map(function(msg){
+    var me=msg.from==='me';
+    return '<div class="slide-up" style="display:flex;justify-content:'+(me?'flex-end':'flex-start')+';margin-bottom:6px;align-items:flex-end;gap:6px;">'
+      +(!me?mkAvatar(f.avatar,28):'')
+      +'<div style="max-width:72%;">'
+      +'<div class="'+(me?'bubble-me':'bubble-them')+'">'+msg.text+'</div>'
+      +'<div class="msg-time" style="text-align:'+(me?'right':'left')+';">'+fmtTime(msg.ts)+(me?' · Delivered':'')+'</div>'
+      +'</div></div>';
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+function sendMsg(){
+  var inp=document.getElementById('msg-input'),text=inp.value.trim();
+  if(!text||!activeChat)return;
+  inp.value='';
+  if(!MESSAGES[activeChat])MESSAGES[activeChat]=[];
+  MESSAGES[activeChat].push({id:'m'+Date.now(),from:'me',text:text,ts:Date.now()});
+  renderRoomMsgs();
+  var fid=activeChat;
+  setTimeout(function(){
+    MESSAGES[fid].push({id:'r'+Date.now(),from:fid,text:REPLIES[Math.floor(Math.random()*REPLIES.length)],ts:Date.now()});
+    if(activeChat===fid)renderRoomMsgs();
+  },1200+Math.random()*800);
+}
+
+// ── FRIENDS ───────────────────────────────────────────────────────────────────
+function renderStreakBoard(){
+  var sorted=FRIENDS.filter(function(f){return STREAKS[f]>0;}).sort(function(a,b){return STREAKS[b]-STREAKS[a];});
+  document.getElementById('streak-board').innerHTML=sorted.map(function(fid,i){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:'+(i<sorted.length-1?'1px solid #2e2e2e':'none')+'">'
+      +'<span style="font-size:13px;font-weight:700;color:#555;width:20px;">#'+(i+1)+'</span>'
+      +mkAvatar(USERS[fid].avatar,36)
+      +'<div style="flex:1;margin-left:2px;"><div style="font-weight:700;font-size:14px;">'+USERS[fid].displayName+'</div><div style="font-size:11px;color:#8a8a8a;">@'+USERS[fid].username+'</div></div>'
+      +'<div style="text-align:right;"><div style="font-size:18px;font-weight:900;color:#FF6B35;">🔥 '+STREAKS[fid]+'</div><div style="font-size:10px;color:#555;">days</div></div>'
+      +'</div>';
+  }).join('');
+}
+function renderFriends(){
+  var q=(document.getElementById('fr-search')?document.getElementById('fr-search').value:'').toLowerCase();
+  var filtered=FRIENDS.filter(function(fid){
+    return !q||USERS[fid].displayName.toLowerCase().indexOf(q)>-1||USERS[fid].username.toLowerCase().indexOf(q)>-1;
+  });
+  document.getElementById('friends-list').innerHTML=filtered.map(function(fid){
+    var f=USERS[fid];
+    return '<div style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid rgba(46,46,46,.3);">'
+      +'<div style="position:relative;flex-shrink:0;">'+mkAvatar(f.avatar,48)+(f.online?'<div class="dot-on"></div>':'')+'</div>'
+      +'<div style="flex:1;"><div style="font-weight:700;font-size:15px;">'+f.displayName+'</div><div style="font-size:12px;color:#8a8a8a;">@'+f.username+(STREAKS[fid]?' · 🔥 '+STREAKS[fid]+' day streak':'')+'</div></div>'
+      +'<button class="press pill" style="background:rgba(255,252,0,.15);color:#FFFC00;border:1px solid rgba(255,252,0,.3);" onclick="showNotif(\'Snap sent to '+f.displayName+'! 👻\')">👻 Snap</button>'
+      +'</div>';
+  }).join('');
+}
+function openAddModal(){
+  document.getElementById('add-q').value='';
+  document.getElementById('add-results').innerHTML='';
+  document.getElementById('add-modal').classList.remove('hidden');
+}
+function closeAddModal(){document.getElementById('add-modal').classList.add('hidden');}
+function renderAddResults(){
+  var q=document.getElementById('add-q').value.trim();
+  var el=document.getElementById('add-results');
+  if(!q){el.innerHTML='';return;}
+  var mock={displayName:'Alex Moon',username:'orbit_kid',avatar:{skinTone:'#C68642',hair:'short',hairColor:'#DAA520',eyes:'round',eyeColor:'#78909C',outfit:'tshirt',outfitColor:'#1565C0',accessory:'none'}};
+  el.innerHTML='<p style="font-size:12px;color:#8a8a8a;margin-bottom:10px;">RESULTS</p>'
+    +'<div style="display:flex;align-items:center;gap:12px;padding:10px 0;">'
+    +mkAvatar(mock.avatar,44)
+    +'<div style="flex:1;"><div style="font-weight:700;font-size:15px;">'+mock.displayName+'</div><div style="font-size:12px;color:#8a8a8a;">@'+mock.username+'</div></div>'
+    +'<button class="press pill" style="background:#FFFC00;color:#000;" onclick="showNotif(\'Friend request sent! 🤝\');closeAddModal();">Add</button>'
+    +'</div>';
+}
+
+// ── PROFILE ───────────────────────────────────────────────────────────────────
+function renderProfile(){
+  var total=Object.values(STREAKS).reduce(function(a,b){return a+b;},0);
+  document.getElementById('profile-hero').innerHTML=
+    '<button onclick="toggleEditor()" style="display:inline-block;position:relative;background:none;border:none;cursor:pointer;" class="press">'
+    +'<div style="width:100px;height:100px;border-radius:50%;border:3px solid #FFFC00;padding:2px;margin:0 auto 12px;">'+mkAvatar(myAvatar,90)+'</div>'
+    +'<div style="position:absolute;bottom:14px;right:-4px;width:28px;height:28px;background:#FFFC00;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;">✏️</div>'
+    +'</button>'
+    +'<h2 style="font-size:22px;font-weight:900;">You</h2>'
+    +'<p style="color:#8a8a8a;font-size:14px;">@you</p>'
+    +'<div style="display:flex;justify-content:center;gap:32px;margin-top:16px;">'
+    +'<div style="text-align:center;"><div style="font-size:22px;font-weight:900;">4</div><div style="font-size:10px;color:#8a8a8a;margin-top:2px;">Friends</div></div>'
+    +'<div style="text-align:center;"><div style="font-size:22px;font-weight:900;">🔥'+total+'</div><div style="font-size:10px;color:#8a8a8a;margin-top:2px;">Streak Days</div></div>'
+    +'<div style="text-align:center;"><div style="font-size:22px;font-weight:900;">247</div><div style="font-size:10px;color:#8a8a8a;margin-top:2px;">Snaps Sent</div></div>'
+    +'</div>';
+  if(editorOpen)renderEditor();
+}
+function toggleEditor(){
+  editorOpen=!editorOpen;
+  document.getElementById('avatar-editor').style.display=editorOpen?'block':'none';
+  if(editorOpen)renderEditor();
+}
+function renderEditor(){
+  document.getElementById('av-preview').innerHTML=mkAvatar(myAvatar,100);
+  document.getElementById('av-tabs').innerHTML=Object.keys(LAYERS).map(function(key){
+    var layer=LAYERS[key];
+    return '<button onclick="setEditLayer(\''+key+'\')" class="press" style="flex-shrink:0;padding:6px 12px;border-radius:20px;background:'+(editLayer===key?'#FFFC00':'#242424')+';color:'+(editLayer===key?'#000':'#8a8a8a')+';font-size:12px;font-weight:700;border:none;cursor:pointer;">'+layer.label+'</button>';
+  }).join('');
+  renderLayerOpts();
+}
+function setEditLayer(key){editLayer=key;renderEditor();}
+function renderLayerOpts(){
+  var el=document.getElementById('av-opts');
+  if(!editLayer){el.innerHTML='';return;}
+  var layer=LAYERS[editLayer];
+  el.innerHTML=layer.options.map(function(opt){
+    var isC=layer.type==='color',sel=myAvatar[editLayer]===opt;
+    return '<button onclick="setAv(\''+editLayer+'\',\''+opt+'\')" class="press" style="'
+      +'width:'+(isC?'36px':'auto')+';height:'+(isC?'36px':'auto')+';'
+      +'padding:'+(isC?'0':'6px 12px')+';'
+      +'border-radius:'+(isC?'50%':'20px')+';'
+      +'background:'+(isC?opt:sel?'#FFFC00':'#242424')+';'
+      +'color:'+(isC?'transparent':sel?'#000':'#fff')+';'
+      +'border:'+(sel?'3px solid #FFFC00':'2px solid #2e2e2e')+';'
+      +'font-size:12px;font-weight:600;cursor:pointer;">'+(isC?'':opt)+'</button>';
+  }).join('');
+}
+function setAv(key,val){myAvatar[key]=val;renderEditor();}
+function saveAvatar(){
+  USERS.me.avatar=copyObj(myAvatar);
+  editorOpen=false;
+  document.getElementById('avatar-editor').style.display='none';
+  renderProfile();
+  showNotif('Avatar saved! ✨');
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+go('login');
+</script>
+</body>
+</html>
